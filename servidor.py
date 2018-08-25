@@ -27,7 +27,7 @@ while True:
 			data = data.encode('utf-8')
 			#a, b, c, d, e = mensagens.split(",")
 			con.send(data)
-			print("Ultimas mensagens recebidas pelo servidor:\n " + str(mensagens))
+			print("Ultimas mensagens recebidas pelo servidor:\n" + str(mensagens))
 			con.close()
 			break
 		else:
