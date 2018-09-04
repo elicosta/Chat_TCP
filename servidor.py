@@ -12,25 +12,29 @@ PORT = 50000
 mensagens = []
 
 def conection(con, cliente):
-	print("Conectado com: " + str(cliente))
+	username = con.recvfrom(1024)
+	username = username[0].decode('utf-8')
+
+	print(username + " conectou com o servidor...")
 
 	while True:
 		msg = con.recvfrom(1024)
+		msg = msg[0].decode('utf-8')
 
-		if msg[0].decode('utf-8') == 'EXIT':
-			data = "' , '".join(mensagens)
+		if msg == 'EXIT':
+			data = "\n".join(mensagens)
 			data = data.encode('utf-8')
 			con.send(data)
-			print("Ultimas mensagens recebidas pelo servidor:\n" + str(mensagens))
+			#print("Ultimas mensagens recebidas pelo servidor:\n" + str(mensagens))
 			con.close()
 			break
 		else:
-			mensagens.append(msg[0].decode('utf-8'))
+			mensagens.append(username + ": " + msg)
 			if len(mensagens) == 6:
 				del mensagens[0]
-			print("Host " + cliente[0] +": ", msg[0].decode('utf-8'))
+			print(username + ": ", msg)
 
-	print('Finalizado conexão do cliente ', cliente[0])
+	print(username + " desconectou do servidor...")
 	_thread.exit()
 
 
