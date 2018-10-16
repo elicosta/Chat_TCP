@@ -20,14 +20,15 @@ def escutar(con):
 		recvmsg = con.recv(1024)
 		recvmsg = recvmsg.decode('utf-8')
 		print(recvmsg)
+		print("Digite sua mensagem: ")
 
 #------------------------------------------------------------------------------------------
 #Recebendo dados do SUAP
 #------------------------------------------------------------------------------------------
+
 #Login para autenticar ao Chat TCP
 matricula = input("Informe sua matrícula: ")
 senha = getpass.getpass("Infome sua senha: ")
-#senha = input("Infome sua senha: ")
 
 autenticacao = {
     "username": str(matricula),
@@ -52,13 +53,16 @@ def getInformacoes():
     return None
 
 informacoes = json.loads(getInformacoes())
+
 #------------------------------------------------------------------------------------------
 #Bloco Principal
 #------------------------------------------------------------------------------------------
 os.system('clear')
 
+print("Por padrão:\nHOST: localhost\nPORT: 50000")
+
 host = input('HOST: ')
-port = int(input('PORT: '))
+port = input('PORT: ')
 
 os.system('clear')
 
@@ -67,36 +71,38 @@ if (len(host) > 0):
 else:
 	host = 'localhost'
 
-if (len(host) > 0):
+if (len(port) > 0):
 	port = int(port)
 else:
 	port = 50000
 
+#Estabelecendo conexão
 tcp_connect = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 tcp_connect.connect((host, port))
 
+#Criando thread para o broadcast do Servidor
 ouvir = threading.Thread(target=escutar, args=(tcp_connect,))
 ouvir.setDaemon(True)
 
+#Enviando informação da API do SUAP para o Servidor
 tcp_connect.send(informacoes['nome_usual'].encode('utf-8'))
 
 print("Conectado como: " + informacoes['nome_usual'])
 print('Para sair use CTRL+X\n')
 
+#Ativando broadcast do cliente
 ouvir.start()
 
-time.sleep(2)
-while True:
-	time.sleep(0.5)
-	msg = input()
-	msg = msg.encode('utf-8')
-	tcp_connect.send(msg)
+time.sleep(1)
 
-	if msg.decode('utf-8') == '\x18':
-		#BD = tcp_connect.recv(1024)
-		#BD = BD.decode('utf-8')
-		#print("As mensagens guardadas no servidor: \n" + BD)
+#Estrutura de envio de mensagens para o servidor
+while True:
+	msg = input()
+	if msg == '\x18':
 		break
-		
+	else:
+		tcp_connect.send(msg.encode('utf-8'))
+	
+#Finalizando conexão
 tcp_connect.close()
 print("\nConexão finalizada...")
