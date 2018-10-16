@@ -4,7 +4,6 @@
 import os
 import time
 import socket
-import threading
 import socketserver
 
 HOST = ''
@@ -12,31 +11,41 @@ PORT = 50000
 
 clientes = []
 nomes = []
+mensagens = []
 
+#------------------------------------------------------------------------------------------
+#Funções do servidor
+#------------------------------------------------------------------------------------------
 class MyTCPServer(socketserver.BaseRequestHandler):
 
 	def handle(self):
 		clientes.append(self.request)
 		self.setnick()
-		#time.sleep(3)
 
 		print(self.connection())
 		welcome = str("Hora local: " + time.strftime('%H:%M') + " | " + str(len(clientes)) + " usuário(s)\n")
 		self.request.send(welcome.encode('utf-8'))
 		self.broadcast(self.connection())
+
+		print(str(len(clientes)) + " usuários online")
+
+		#Envio das mensagens que estão armazenadas no servidor
+		BD = "\n".join(mensagens)
+		self.request.send(BD.encode('utf-8'))
+
 		time.sleep(1)
 
-		print(str(len(clientes)) + " usuários online\n")
-        
 		while True:
 			try:
-				data = self.request.recv(1024)
+				data = self.request.recv(1024) #Recebendo informações dos clientes
 				data = data.decode('utf-8')
 				print (self.nickname + "(" + self.client_address[0] + "): " + data)
-				out = str(self.nickname + ": " + data)
-				self.broadcast(out)
+				out = str("- " + self.nickname + ": " + data)
+				mensagens.append(out) #Armazenando informações no servidor
+				self.broadcast(out) #Envio das mensagens para seus clientes
 		        
 			except:
+				#Quando é finalizado conexão do cliente para o Servidor
 				print(self.disconnection())
 				clientes.remove(self.request)
 				nomes.remove(self.nickname)
@@ -48,14 +57,13 @@ class MyTCPServer(socketserver.BaseRequestHandler):
         
 	def broadcast(self, data):
 		for user in clientes:
-			if user != clientes:
-				user.send(data.encode('utf-8'))
+			user.send(data.encode('utf-8'))
 
 	def disconnection(self):
-		return "\n" + self.nickname + "(" + self.client_address[0] + ") Desconectado de " + time.strftime('%H:%M')
+		return "\n" + self.nickname + "(" + self.client_address[0] + ") Desconectado de " + time.strftime('%H:%M') + "\n"
 
 	def connection(self):
-		return "\n" + self.nickname + "(" + self.client_address[0] + ") Conectado de " + time.strftime('%H:%M')
+		return "\n" + self.nickname + "(" + self.client_address[0] + ") Conectado de " + time.strftime('%H:%M') + "\n"
 
 	def setnick(self):
 		self.nickname = self.request.recv(1024)
@@ -64,8 +72,9 @@ class MyTCPServer(socketserver.BaseRequestHandler):
 		nomes.append(self.nickname)
 
 class ThreadingTCPServer(socketserver.ThreadingMixIn, socketserver.TCPServer):
-    pass
+		pass
 
+#Criando Servidor com base no IP e porta 50000
 server = ThreadingTCPServer((HOST, PORT), MyTCPServer)
 
 #------------------------------------------------------------
@@ -76,12 +85,8 @@ os.system('clear')
 print("Bem-vindo ao CHAT\n")
 print("Hora local: " + time.strftime('%H:%M') + " | " + str(len(clientes)) + " usuário(s)")  
 print('Servidor iniciado no IP na porta', PORT)
+print('Para encerrar use CTRL+C\n')
 print('\nAguardando conexões')
 
-#Criando Servidor com base no IP e porta 50000
-server_thread = threading.Thread(target=server.serve_forever)
-# Terminar quando o main terminar
-#server_thread.daemon = True
-server_thread.start()
-
-#server.shutdown()
+#Iniciando servidor socket
+server.serve_forever()
