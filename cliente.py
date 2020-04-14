@@ -60,6 +60,7 @@ informacoes = json.loads(getInformacoes())
 #------------------------------------------------------------------------------------------
 #Recebendo dados do BD
 #------------------------------------------------------------------------------------------
+
 def RecuperaBD():
 	connConexao = psycopg2.connect(ConexaoDBmgs)
 	curConexao = connConexao.cursor()
@@ -78,6 +79,7 @@ def RecuperaBD():
 #------------------------------------------------------------------------------------------
 #Bloco Principal
 #------------------------------------------------------------------------------------------
+
 os.system('clear')
 
 print("Por padrão: \n\tHOST: localhost PORT: 50000\n")

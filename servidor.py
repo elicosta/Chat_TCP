@@ -26,6 +26,7 @@ SQLCriaTable = "CREATE TABLE bdmgs (nome VARCHAR(100), data VARCHAR(20), hora VA
 #------------------------------------------------------------------------------------------
 #Funções para o Banco de Dados
 #------------------------------------------------------------------------------------------
+
 def tabela_existe(NomeTabela):
 	strSQL1 = "SELECT EXISTS(SELECT datname FROM pg_database WHERE datname='{0}')".format(NomeTabela)
 	strSQL = "SELECT EXISTS(SELECT relname FROM pg_class WHERE relname='{0}')".format(NomeTabela)
@@ -75,6 +76,7 @@ def Guardarmsg(nome, data, hora, mensagem, endereco):
 #------------------------------------------------------------------------------------------
 #Funções do servidor
 #------------------------------------------------------------------------------------------
+
 class MyTCPServer(socketserver.BaseRequestHandler):
 
 	def handle(self):
@@ -141,6 +143,7 @@ server = ThreadingTCPServer((HOST, PORT), MyTCPServer)
 #------------------------------------------------------------
 # Bloco principal
 #------------------------------------------------------------
+
 os.system('clear')
 
 print("Bem-vindo ao CHAT\n")
